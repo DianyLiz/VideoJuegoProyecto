@@ -6,6 +6,7 @@ import pygame as pg
 import json
 from enemy import Enemy
 from world import World
+from turret import Turret
 import constants as c
 pg.init()
 
@@ -18,12 +19,24 @@ pg.display.set_caption("Tower Defence")
 
 map_image = pg.image.load("levels/level.png").convert_alpha()
 
+#Torre individual imagen 
+cursor_turret = pg.image.load("imagen/cursor_turret.png").convert_alpha()
+
 enemy_image = pg.image.load("imagen/enemy_1.png").convert_alpha()
 
 #Cargar el archivo json
 with open("levels/level.tmj") as file:
     world_data = json.load(file)
 
+def create_turret(mouse_pos):
+    mouse_title_x = mouse_pos[0] // c.TILE_SIZE
+    mouse_title_y = mouse_pos[1] // c.TILE_SIZE
+    #Calcular la secuencia de numeros del titulo
+    mouse_title_num = (mouse_title_y * c.COLS) + mouse_title_x
+    #Chequiar si el titulo es valido
+    if world.title_map[mouse_title_num] == 7:
+        turret = Turret(cursor_turret, mouse_title_x, mouse_title_y)
+        turret_group.add(turret)
 
 #crear un mundo
 
@@ -31,9 +44,9 @@ world = World(world_data,map_image)
 
 world.process_data()
 
-#crear un grupo de imagenes
+#crear un grupo 
 enemy_group = pg.sprite.Group()
-
+turret_group = pg.sprite.Group()
 
 enemy = Enemy(world.waypoints,enemy_image)
 
@@ -55,11 +68,19 @@ while run:
     enemy_group.update()
     #Dibujar el grupo 
     enemy_group.draw(screen)
+    turret_group.draw(screen)
 
     #Manejo del evento
     for event in pg.event.get():
         if event.type == pg.QUIT:
             run = False
+
+        #Manejo de eventos del ratón
+        if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+            mouse_pos = pg.mouse.get_pos()
+            #Chequiar si el ratón se encuentra sobre una torre
+            if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
+                create_turret(mouse_pos)
 
 
     pg.display.flip()
