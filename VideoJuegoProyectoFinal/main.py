@@ -32,12 +32,18 @@ def create_turret(mouse_pos):
     mouse_title_x = mouse_pos[0] // c.TILE_SIZE
     mouse_title_y = mouse_pos[1] // c.TILE_SIZE
     #Calcular la secuencia de numeros del titulo
-    mouse_title_num = (mouse_title_y * c.COLS) + mouse_title_x
+    mouse_tile_num = (mouse_title_y * c.COLS) + mouse_title_x
     #Chequiar si el titulo es valido
-    if world.title_map[mouse_title_num] == 7:
-        turret = Turret(cursor_turret, mouse_title_x, mouse_title_y)
-        turret_group.add(turret)
-
+    if world.tile_map[mouse_tile_num] == 7:
+        #Chequiar si el cursor se encuentra sobre una torre
+        space_is_free = True
+        for turret in turret_group:
+            if (mouse_title_x, mouse_title_y) == (turret.title_x, turret.title_y):
+                space_is_free = False
+        #Si la torre no es una torre no valida, no crearla
+        if space_is_free == True:
+            new_turret = Turret(cursor_turret, mouse_title_x, mouse_title_y)
+            turret_group.add(new_turret)
 #crear un mundo
 
 world = World(world_data,map_image)
