@@ -7,6 +7,7 @@ import json
 from enemy import Enemy
 from world import World
 from turret import Turret
+from button import Button
 import constants as c
 pg.init()
 
@@ -58,6 +59,11 @@ world.process_data()
 enemy_group = pg.sprite.Group()
 turret_group = pg.sprite.Group()
 
+#crear botones
+turret_buy_button = Button(c.SCREEN_WIDTH + 30, 120, buy_turret_image, True)
+cancel_buy_button = Button(c.SCREEN_WIDTH + 50, 180, cancel_turret_image, True)
+
+
 enemy = Enemy(world.waypoints,enemy_image)
 
 #Añadir el imagen al grupo
@@ -67,18 +73,25 @@ run = True
 while run:
 
     clock.tick(c.FPS)
+
+    #Actualiza los grupos
+    enemy_group.update()
+
     screen.fill("grey100")
 
     #dibujar el mundo
     world.draw(screen)
 
     
-
-    #Actualiza los grupos
-    enemy_group.update()
     #Dibujar el grupo 
     enemy_group.draw(screen)
     turret_group.draw(screen)
+
+    #Dibujar los botones
+    if turret_buy_button.draw(screen):
+        print("Nueva Torre")
+    if cancel_buy_button.draw(screen):
+        print("Cancelar Torre")
 
     #Manejo del evento
     for event in pg.event.get():
