@@ -13,8 +13,8 @@ pg.init()
 #crear un reloj
 clock = pg.time.Clock()
 
-
-screen = pg.display.set_mode((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+#CREAR VIDEOJUEGO WINDOW
+screen = pg.display.set_mode((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
 pg.display.set_caption("Tower Defence")
 
 map_image = pg.image.load("levels/level.png").convert_alpha()
@@ -23,6 +23,10 @@ map_image = pg.image.load("levels/level.png").convert_alpha()
 cursor_turret = pg.image.load("imagen/cursor_turret.png").convert_alpha()
 
 enemy_image = pg.image.load("imagen/enemy_1.png").convert_alpha()
+
+#Boton 
+buy_turret_image = pg.image.load("Botones/buy_turret.png").convert_alpha()
+cancel_turret_image = pg.image.load("Botones/cancel.png").convert_alpha()
 
 #Cargar el archivo json
 with open("levels/level.tmj") as file:
