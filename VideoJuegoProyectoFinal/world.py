@@ -25,7 +25,6 @@ class World():
         for point in data:
             temp_x = point.get("x")
             temp_y = point.get("y")
-            print((temp_x,temp_y))
             self.waypoints.append((temp_x,temp_y))
 
 

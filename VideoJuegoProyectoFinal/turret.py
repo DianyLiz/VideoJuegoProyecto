@@ -4,11 +4,14 @@ import constants as c
 class Turret(pg.sprite.Sprite):
     def __init__(self, sprite_sheet, title_x, title_y):
         pg.sprite.Sprite.__init__(self)
+        self.range = 90 #rango de la torre
         self.cooldown = 1500
         self.last_shot = pg.time.get_ticks()
+
         #posicion de la variable
         self.title_x = title_x
         self.title_y = title_y
+
         #calcular centro de las coordenadas
         self.x = (self.title_x + 0.5)* c.TILE_SIZE
         self.y = (self.title_y + 0.5)* c.TILE_SIZE
@@ -23,7 +26,15 @@ class Turret(pg.sprite.Sprite):
         self.image = self.animation_list[self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.center = (self.x , self.y)
-        
+
+        #crear circulo transparente para el rango
+        self.range_image = pg.Surface((self.range * 2, self.range * 2))
+        self.range_image.fill((0, 0, 0))
+        self.range_image.set_colorkey((0, 0, 0))
+        pg.draw.circle(self.range_image, "grey100", (self.range, self.range), self.range)
+        self.range_image.set_alpha(100)
+        self.range_rect = self.range_image.get_rect()
+        self.range_rect.center = self.rect.center
     def load_images(self):
         #Extraer las imagenes de la hoja de animacion
         size = self.sprite_sheet.get_height()
@@ -41,6 +52,7 @@ class Turret(pg.sprite.Sprite):
     def play_animation(self):
         #actualizar imagen
         self.image = self.animation_list[self.frame_index]
+
         #actualizar tiempo
         if pg.time.get_ticks() - self.update_time > c.ANIMATION_DELAY:
             self.update_time = pg.time.get_ticks()
@@ -51,4 +63,7 @@ class Turret(pg.sprite.Sprite):
                 self.frame_index = 0
                 #recorrer completo tiempo y limpieza de torres
                 self.last_shot = pg.time.get_ticks()
+
+    def draw (self, surface):
+        surface.blit(self.range_image, self.range_rect)
             

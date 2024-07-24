@@ -42,8 +42,10 @@ with open("levels/level.tmj") as file:
 def create_turret(mouse_pos):
     mouse_title_x = mouse_pos[0] // c.TILE_SIZE
     mouse_title_y = mouse_pos[1] // c.TILE_SIZE
+
     #Calcular la secuencia de numeros del titulo
     mouse_tile_num = (mouse_title_y * c.COLS) + mouse_title_x
+
     #Chequiar si el titulo es valido
     if world.tile_map[mouse_tile_num] == 7:
         #Chequiar si el cursor se encuentra sobre una torre
@@ -51,6 +53,7 @@ def create_turret(mouse_pos):
         for turret in turret_group:
             if (mouse_title_x, mouse_title_y) == (turret.title_x, turret.title_y):
                 space_is_free = False
+                
         #Si la torre no es una torre no valida, no crearla
         if space_is_free == True:
             new_turret = Turret(turret_sheet, mouse_title_x, mouse_title_y)
