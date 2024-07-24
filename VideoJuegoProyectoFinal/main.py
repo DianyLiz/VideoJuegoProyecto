@@ -18,7 +18,13 @@ clock = pg.time.Clock()
 screen = pg.display.set_mode((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
 pg.display.set_caption("Tower Defence")
 
+#Variables del Juego
+placing_turrets = False
+
 map_image = pg.image.load("levels/level.png").convert_alpha()
+
+#torre individual imagen
+turret_sheet = pg.image.load("imagen/turret_1.png").convert_alpha()
 
 #Torre individual imagen 
 cursor_turret = pg.image.load("imagen/cursor_turret.png").convert_alpha()
@@ -47,7 +53,7 @@ def create_turret(mouse_pos):
                 space_is_free = False
         #Si la torre no es una torre no valida, no crearla
         if space_is_free == True:
-            new_turret = Turret(cursor_turret, mouse_title_x, mouse_title_y)
+            new_turret = Turret(turret_sheet, mouse_title_x, mouse_title_y)
             turret_group.add(new_turret)
 #crear un mundo
 
@@ -76,6 +82,7 @@ while run:
 
     #Actualiza los grupos
     enemy_group.update()
+    turret_group.update()
 
     screen.fill("grey100")
 
@@ -89,9 +96,18 @@ while run:
 
     #Dibujar los botones
     if turret_buy_button.draw(screen):
-        print("Nueva Torre")
-    if cancel_buy_button.draw(screen):
-        print("Cancelar Torre")
+        placing_turrets = True
+    
+    #Si la colocacion de la torre es correcta, crear la torre
+    if placing_turrets == True:
+        #Cursor en la torre
+        cursor_rect = cursor_turret.get_rect()
+        cursor_pos = pg.mouse.get_pos()
+        if cursor_pos[0] <= c.SCREEN_WIDTH:
+            cursor_rect.center = cursor_pos
+        screen.blit(cursor_turret, cursor_rect)
+        if cancel_buy_button.draw(screen):
+            placing_turrets = False
 
     #Manejo del evento
     for event in pg.event.get():
@@ -103,7 +119,8 @@ while run:
             mouse_pos = pg.mouse.get_pos()
             #Chequiar si el ratón se encuentra sobre una torre
             if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
-                create_turret(mouse_pos)
+                if placing_turrets == True:
+                    create_turret(mouse_pos)
 
 
     pg.display.flip()
