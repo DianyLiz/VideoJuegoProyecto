@@ -20,6 +20,7 @@ pg.display.set_caption("Tower Defence")
 
 #Variables del Juego
 placing_turrets = False
+selected_turret = None
 
 map_image = pg.image.load("levels/level.png").convert_alpha()
 
@@ -58,6 +59,18 @@ def create_turret(mouse_pos):
         if space_is_free == True:
             new_turret = Turret(turret_sheet, mouse_title_x, mouse_title_y)
             turret_group.add(new_turret)
+
+def select_turret(mouse_pos):
+  mouse_title_x = mouse_pos[0] // c.TILE_SIZE
+  mouse_title_y = mouse_pos[1] // c.TILE_SIZE
+  for turret in turret_group:
+    if (mouse_title_x, mouse_title_y) == (turret.title_x, turret.title_y):
+      return turret
+    
+def clear_selection():
+    for turret in turret_group:
+        turret.selected = False
+
 #crear un mundo
 
 world = World(world_data,map_image)
@@ -85,7 +98,11 @@ while run:
 
     #Actualiza los grupos
     enemy_group.update()
-    turret_group.update()
+    turret_group.update(enemy_group)
+
+    #seleccionada en el cursor del ratón 
+    if selected_turret:
+        selected_turret.selected = True
 
     screen.fill("grey100")
 
@@ -95,7 +112,8 @@ while run:
     
     #Dibujar el grupo 
     enemy_group.draw(screen)
-    turret_group.draw(screen)
+    for turret in turret_group:
+        turret.draw(screen)
 
     #Dibujar los botones
     if turret_buy_button.draw(screen):
@@ -120,10 +138,15 @@ while run:
         #Manejo de eventos del ratón
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pg.mouse.get_pos()
-            #Chequiar si el ratón se encuentra sobre una torre
+      #Chequiar si el mouse se encuentra en el area del juego
             if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
+             #Limpiar la torre seleccionada
+                selected_turret = None
+                clear_selection()
                 if placing_turrets == True:
                     create_turret(mouse_pos)
+                else:
+                    selected_turret = select_turret(mouse_pos)
 
 
     pg.display.flip()
