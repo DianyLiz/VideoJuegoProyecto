@@ -35,6 +35,7 @@ enemy_image = pg.image.load("imagen/enemy_1.png").convert_alpha()
 #Boton 
 buy_turret_image = pg.image.load("Botones/buy_turret.png").convert_alpha()
 cancel_turret_image = pg.image.load("Botones/cancel.png").convert_alpha()
+upgrade_turret_image = pg.image.load("Botones/upgrade_turret.png").convert_alpha()
 
 #Cargar el archivo json
 with open("levels/level.tmj") as file:
@@ -84,6 +85,7 @@ turret_group = pg.sprite.Group()
 #crear botones
 turret_buy_button = Button(c.SCREEN_WIDTH + 30, 120, buy_turret_image, True)
 cancel_buy_button = Button(c.SCREEN_WIDTH + 50, 180, cancel_turret_image, True)
+upgrade_button = Button(c.SCREEN_WIDTH + 5, 180, upgrade_turret_image, True)
 
 
 enemy = Enemy(world.waypoints,enemy_image)
@@ -129,6 +131,13 @@ while run:
         screen.blit(cursor_turret, cursor_rect)
         if cancel_buy_button.draw(screen):
             placing_turrets = False
+
+        #Si la torre es seleccionada actualizar la torre
+    if selected_turret:
+        if selected_turret.upgrade_level < c.TURRET_LEVELS:
+            if upgrade_button.draw(screen):
+                selected_turret.upgrade()
+                        
 
     #Manejo del evento
     for event in pg.event.get():
