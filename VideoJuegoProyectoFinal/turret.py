@@ -4,7 +4,7 @@ import constants as c
 from turret_data import TURRET_DATA
 
 class Turret(pg.sprite.Sprite):
-    def __init__(self, sprite_sheet, title_x, title_y):
+    def __init__(self, sprite_sheets, title_x, title_y):
         pg.sprite.Sprite.__init__(self)
         self.upgrade_level = 1
         self.range = TURRET_DATA[self.upgrade_level - 1].get("range")#rango de la torre
@@ -22,8 +22,8 @@ class Turret(pg.sprite.Sprite):
         self.y = (self.title_y + 0.5)* c.TILE_SIZE
 
         #animacion de la variable
-        self.sprite_sheet = sprite_sheet
-        self.animation_list = self.load_images()
+        self.sprite_sheets = sprite_sheets
+        self.animation_list = self.load_images(self.sprite_sheets[self.upgrade_level - 1])
         self.frame_index = 0
         self.update_time = pg.time.get_ticks()
 
@@ -42,13 +42,13 @@ class Turret(pg.sprite.Sprite):
         self.range_image.set_alpha(100)
         self.range_rect = self.range_image.get_rect()
         self.range_rect.center = self.rect.center
-    def load_images(self):
+    def load_images(self, sprite_sheet):
         #Extraer las imagenes de la hoja de animacion
-        size = self.sprite_sheet.get_height()
+        size = sprite_sheet.get_height()
         animation_list = []
 
         for x in range(c.ANIMATION_STEPS):
-            temp_img = self.sprite_sheet.subsurface(x * size, 0, size, size)
+            temp_img = sprite_sheet.subsurface(x * size, 0, size, size)
             animation_list.append(temp_img)
         return animation_list
     
@@ -95,6 +95,10 @@ class Turret(pg.sprite.Sprite):
         self.upgrade_level += 1
         self.range = TURRET_DATA[self.upgrade_level - 1].get("range")#rango de la torre
         self.cooldown = TURRET_DATA[self.upgrade_level - 1].get("cooldown")
+
+        #actualizar imagen de la torre
+        self.animation_list = self.load_images(self.sprite_sheets[self.upgrade_level - 1])
+        self.original_image = self.animation_list[self.frame_index]
 
         #actualizar circulo transparente para el rango
         self.range_image = pg.Surface((self.range * 2, self.range * 2))

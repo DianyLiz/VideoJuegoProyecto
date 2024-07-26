@@ -25,7 +25,10 @@ selected_turret = None
 map_image = pg.image.load("levels/level.png").convert_alpha()
 
 #torre individual imagen
-turret_sheet = pg.image.load("imagen/turret_1.png").convert_alpha()
+turret_spritesheets = []
+for x in range(1, c.TURRET_LEVELS + 1):
+    turret_sheet = pg.image.load(f"imagen/turret_{x}.png").convert_alpha()
+    turret_spritesheets.append(turret_sheet)
 
 #Torre individual imagen 
 cursor_turret = pg.image.load("imagen/cursor_turret.png").convert_alpha()
@@ -58,7 +61,7 @@ def create_turret(mouse_pos):
                 
         #Si la torre no es una torre no valida, no crearla
         if space_is_free == True:
-            new_turret = Turret(turret_sheet, mouse_title_x, mouse_title_y)
+            new_turret = Turret(turret_spritesheets, mouse_title_x, mouse_title_y)
             turret_group.add(new_turret)
 
 def select_turret(mouse_pos):
