@@ -32,8 +32,13 @@ for x in range(1, c.TURRET_LEVELS + 1):
 
 #Torre individual imagen 
 cursor_turret = pg.image.load("imagen/cursor_turret.png").convert_alpha()
-
-enemy_image = pg.image.load("imagen/enemy_1.png").convert_alpha()
+enemy_images = {
+    "weak": pg.image.load("imagen/enemy_1.png").convert_alpha(),
+    "medium": pg.image.load("imagen/enemy_2.png").convert_alpha(),
+    "strong": pg.image.load("imagen/enemy_3.png").convert_alpha(),
+    "elite": pg.image.load("imagen/enemy_4.png").convert_alpha()
+    
+}
 
 #Boton 
 buy_turret_image = pg.image.load("Botones/buy_turret.png").convert_alpha()
@@ -80,6 +85,7 @@ def clear_selection():
 world = World(world_data,map_image)
 
 world.process_data()
+world.process_enemies()
 
 #crear un grupo 
 enemy_group = pg.sprite.Group()
@@ -91,7 +97,8 @@ cancel_buy_button = Button(c.SCREEN_WIDTH + 50, 180, cancel_turret_image, True)
 upgrade_button = Button(c.SCREEN_WIDTH + 5, 180, upgrade_turret_image, True)
 
 
-enemy = Enemy(world.waypoints,enemy_image)
+enemy_type = "weak"
+enemy = Enemy(enemy_type,world.waypoints,enemy_images)
 
 #Añadir el imagen al grupo
 enemy_group.add(enemy)
