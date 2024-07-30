@@ -46,8 +46,8 @@ class Enemy(pg.sprite.Sprite):
         dist = self.movement.length()
 
         #chequiar si el enemigo ha alcanzado el punto de destino
-        if dist >= self.speed:
-            self.pos += self.movement.normalize() * self.speed
+        if dist >= (self.speed * world.game_speed):
+            self.pos += self.movement.normalize() * (self.speed * world.game_speed)
         else:
             #si no ha alcanzado el punto de destino, se mueve al siguiente punto de destino
             if dist > 0:

@@ -52,13 +52,13 @@ class Turret(pg.sprite.Sprite):
             animation_list.append(temp_img)
         return animation_list
     
-    def update(self, enemy_group):
+    def update(self, enemy_group, world):
         #si el rango esta seleccionado
         if self.target:
             self.play_animation()
         else:
         #Busqueda desde nueva posicion a la actual
-            if pg.time.get_ticks() - self.last_shot > self.cooldown:
+            if pg.time.get_ticks() - self.last_shot > (self.cooldown / world.game_speed):
                 self.pick_target(enemy_group)
 
     def pick_target(self, enemy_group):

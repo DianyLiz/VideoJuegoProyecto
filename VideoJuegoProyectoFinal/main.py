@@ -50,6 +50,13 @@ cancel_turret_image = pg.image.load("Botones/cancel.png").convert_alpha()
 upgrade_turret_image = pg.image.load("Botones/upgrade_turret.png").convert_alpha()
 begin_image = pg.image.load("Botones/begin.png").convert_alpha()
 restart_image = pg.image.load("Botones/restart.png").convert_alpha()
+fast_forward_image = pg.image.load("Botones/fast_forward.png").convert_alpha()
+
+heart_image = pg.image.load("imagen/heart.png").convert_alpha()
+coin_image = pg.image.load("imagen/coin.png").convert_alpha()
+logo_image = pg.image.load("imagen/logo.png").convert_alpha()
+
+
 
 #Cargar el archivo json
 with open("levels/level.tmj") as file:
@@ -62,6 +69,13 @@ large_font = pg.font.SysFont("Consolas", 36)
 def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
+
+def display_data():
+    pg.draw.rect(screen, "maroon", (c.SCREEN_WIDTH, 0, c.SIDE_PANEL, c.SCREEN_HEIGHT))
+    pg.draw.rect(screen, "grey0", (c.SCREEN_WIDTH, 0, c.SIDE_PANEL, 400), 2)
+    draw_text(str(world.health), text_font, "grey100", 0,0)
+    draw_text(str(world.money), text_font, "grey100", 0,30)
+    draw_text(str(world.level), text_font, "grey100", 0,60)
 
 def create_turret(mouse_pos):
     mouse_title_x = mouse_pos[0] // c.TILE_SIZE
@@ -112,6 +126,7 @@ cancel_buy_button = Button(c.SCREEN_WIDTH + 50, 180, cancel_turret_image, True)
 upgrade_button = Button(c.SCREEN_WIDTH + 5, 180, upgrade_turret_image, True)
 begin_button = Button(c.SCREEN_WIDTH + 60, 300, begin_image, True)
 restart_button = Button(310, 300, restart_image, True)
+fast_forward_button = Button(c.SCREEN_WIDTH + 60, 300, fast_forward_image, False)
 
 run = True
 while run:
@@ -129,13 +144,12 @@ while run:
 
         #Actualiza los grupos
         enemy_group.update(world)
-        turret_group.update(enemy_group)
+        turret_group.update(enemy_group, world)
 
         #seleccionada en el cursor del ratón 
         if selected_turret:
             selected_turret.selected = True
 
-    screen.fill("grey100")
 
     #dibujar el mundo
     world.draw(screen)
@@ -146,15 +160,16 @@ while run:
     for turret in turret_group:
         turret.draw(screen)
 
-    draw_text(str(world.health), text_font, "grey100", 0,0)
-    draw_text(str(world.money), text_font, "grey100", 0,30)
-    draw_text(str(world.level), text_font, "grey100", 0,60)
+    display_data()
 
     if game_over == False:
         if level_started == False:
             if begin_button.draw(screen):
                 level_started = True
         else:
+            world.game_speed = 1
+            if fast_forward_button.draw(screen):
+                world.game_speed = 2
             if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN:
                 if world.spawned_enemies < len(world.enemy_list):
                     enemy_type = world.enemy_list[world.spawned_enemies]
@@ -197,7 +212,7 @@ while run:
     else:
         pg.draw.rect(screen, "dodgerblue", (200, 200, 400, 200), border_radius = 30)
         if game_outcome == -1:
-            draw_text("Terminaste", large_font, "grey0", 310, 230)
+            draw_text("Perdiste", large_font, "grey0", 310, 230)
         elif game_outcome == 1:
             draw_text("Ganaste!", large_font, "grey0", 315, 230)
         if restart_button.draw(screen):
