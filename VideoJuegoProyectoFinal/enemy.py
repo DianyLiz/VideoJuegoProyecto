@@ -40,6 +40,7 @@ class Enemy(pg.sprite.Sprite):
             #enemigo ha llegado al destino
             self.kill()
             world.health -= 1
+            world.missed_enemies += 1
 
         #calcular la distancia entre el punto de destino y el enemigo
         dist = self.movement.length()
@@ -66,5 +67,6 @@ class Enemy(pg.sprite.Sprite):
 
     def check_alive(self, world):
         if self.health <= 0:
+            world.kill_enemies += 1
             world.money += c.KILL_REWARD
             self.kill()
