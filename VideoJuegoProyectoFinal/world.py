@@ -2,6 +2,7 @@ import os
 os.system('cls' if os.name == 'nt' else 'clear')
 
 import pygame as pg
+import random 
 from enemy_data import ENEMY_SPAWN_DATA
 
 class World():
@@ -38,6 +39,8 @@ class World():
             enemies_to_spawn = enemies[enemy_type]
             for enemy in range(enemies_to_spawn):
                 self.enemy_list.append(enemy_type)
+        #random lista de enemigos
+        random.shuffle(self.enemy_list)
 
     def draw(self,surface):
         surface.blit(self.image,(0,0))

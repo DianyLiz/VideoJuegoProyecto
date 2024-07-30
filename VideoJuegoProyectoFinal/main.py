@@ -19,6 +19,7 @@ screen = pg.display.set_mode((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
 pg.display.set_caption("Tower Defence")
 
 #Variables del Juego
+last_enemy_spawn = pg.time.get_ticks()
 placing_turrets = False
 selected_turret = None
 
@@ -96,13 +97,6 @@ turret_buy_button = Button(c.SCREEN_WIDTH + 30, 120, buy_turret_image, True)
 cancel_buy_button = Button(c.SCREEN_WIDTH + 50, 180, cancel_turret_image, True)
 upgrade_button = Button(c.SCREEN_WIDTH + 5, 180, upgrade_turret_image, True)
 
-
-enemy_type = "weak"
-enemy = Enemy(enemy_type,world.waypoints,enemy_images)
-
-#Añadir el imagen al grupo
-enemy_group.add(enemy)
-
 run = True
 while run:
 
@@ -126,6 +120,14 @@ while run:
     enemy_group.draw(screen)
     for turret in turret_group:
         turret.draw(screen)
+
+    if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN:
+        if world.spawned_enemies < len(world.enemy_list):
+            enemy_type = world.enemy_list[world.spawned_enemies]
+            enemy = Enemy(enemy_type,world.waypoints,enemy_images)
+            enemy_group.add(enemy)
+            world.spawned_enemies += 1
+            last_enemy_spawn = pg.time.get_ticks()
 
     #Dibujar los botones
     if turret_buy_button.draw(screen):
