@@ -6,6 +6,7 @@ from typing import Any
 import pygame as pg
 from pygame.math import Vector2
 import math
+import constants as c
 from enemy_data import ENEMY_DATA
 
 #Clase enemigo 
@@ -16,8 +17,7 @@ class Enemy(pg.sprite.Sprite):
         self.pos = Vector2(self.waypoints[0])
         self.target_waypoint = 1
         self.health = ENEMY_DATA.get(enemy_type)["health"]
-        self.health = ENEMY_DATA.get(enemy_type)["speed"]
-        self.speed = 2
+        self.speed = ENEMY_DATA.get(enemy_type)["speed"]
         self.angle = 0
         self.original_image = images.get(enemy_type)
         self.image = pg.transform.rotate(self.original_image, self.angle)
@@ -25,12 +25,13 @@ class Enemy(pg.sprite.Sprite):
         self.rect.center = self.pos
 
 
-    def update(self):
-        self.move()
+    def update(self, world):
+        self.move(world)
         self.rotate()
+        self.check_alive(world)
 
     #Movimiento
-    def move(self):
+    def move(self, world):
         #definir el punto de destino
         if self.target_waypoint < len(self.waypoints):
             self.target = Vector2(self.waypoints[self.target_waypoint])
@@ -38,6 +39,7 @@ class Enemy(pg.sprite.Sprite):
         else:
             #enemigo ha llegado al destino
             self.kill()
+            world.health -= 1
 
         #calcular la distancia entre el punto de destino y el enemigo
         dist = self.movement.length()
@@ -61,3 +63,8 @@ class Enemy(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
+
+    def check_alive(self, world):
+        if self.health <= 0:
+            world.money += c.KILL_REWARD
+            self.kill()
