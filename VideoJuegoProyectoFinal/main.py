@@ -21,6 +21,7 @@ pg.display.set_caption("Tower Defence")
 #Variables del Juego
 game_over = False
 geme_outcome = 0 
+game_speed_toggle = False
 level_started = False
 last_enemy_spawn = pg.time.get_ticks()
 placing_turrets = False
@@ -45,12 +46,13 @@ enemy_images = {
 }
 
 #Boton 
-buy_turret_image = pg.image.load("Botones/buy_turret.png").convert_alpha()
-cancel_turret_image = pg.image.load("Botones/cancel.png").convert_alpha()
-upgrade_turret_image = pg.image.load("Botones/upgrade_turret.png").convert_alpha()
-begin_image = pg.image.load("Botones/begin.png").convert_alpha()
-restart_image = pg.image.load("Botones/restart.png").convert_alpha()
-fast_forward_image = pg.image.load("Botones/fast_forward.png").convert_alpha()
+buy_turret_image = pg.image.load("imagen/buy_turret.png").convert_alpha()
+cancel_turret_image = pg.image.load("imagen/cancel.png").convert_alpha()
+upgrade_turret_image = pg.image.load("imagen/upgrade_turret.png").convert_alpha()
+begin_image = pg.image.load("imagen/begin.png").convert_alpha()
+restart_image = pg.image.load("imagen/restart.png").convert_alpha()
+fast_forward_false_image = pg.image.load('imagen/fast_forward_false.png').convert_alpha()
+fast_forward_true_image = pg.image.load('imagen/fast_forward_true.png').convert_alpha()
 
 heart_image = pg.image.load("imagen/heart.png").convert_alpha()
 coin_image = pg.image.load("imagen/coin.png").convert_alpha()
@@ -133,7 +135,7 @@ cancel_buy_button = Button(c.SCREEN_WIDTH + 50, 180, cancel_turret_image, True)
 upgrade_button = Button(c.SCREEN_WIDTH + 5, 180, upgrade_turret_image, True)
 begin_button = Button(c.SCREEN_WIDTH + 60, 300, begin_image, True)
 restart_button = Button(310, 300, restart_image, True)
-fast_forward_button = Button(c.SCREEN_WIDTH + 60, 300, fast_forward_image, False)
+fast_forward_button = Button(c.SCREEN_WIDTH + 60, 300, fast_forward_false_image, True)
 
 run = True
 while run:
@@ -174,9 +176,17 @@ while run:
             if begin_button.draw(screen):
                 level_started = True
         else:
-            world.game_speed = 1
+            # Opcion de Aceleracion de juego
             if fast_forward_button.draw(screen):
+                game_speed_toggle = not game_speed_toggle
+
+            if game_speed_toggle:
+                world.game_speed = 1
+                fast_forward_button.image = fast_forward_false_image
+            else:
                 world.game_speed = 2
+                fast_forward_button.image = fast_forward_true_image
+
             if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN:
                 if world.spawned_enemies < len(world.enemy_list):
                     enemy_type = world.enemy_list[world.spawned_enemies]
