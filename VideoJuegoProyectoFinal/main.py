@@ -56,6 +56,9 @@ heart_image = pg.image.load("imagen/heart.png").convert_alpha()
 coin_image = pg.image.load("imagen/coin.png").convert_alpha()
 logo_image = pg.image.load("imagen/logo.png").convert_alpha()
 
+#audio
+shot_fx = pg.mixer.Sound("Audio/shot.wav")
+shot_fx.set_volume(0.5)
 
 
 #Cargar el archivo json
@@ -73,9 +76,13 @@ def draw_text(text, font, text_col, x, y):
 def display_data():
     pg.draw.rect(screen, "maroon", (c.SCREEN_WIDTH, 0, c.SIDE_PANEL, c.SCREEN_HEIGHT))
     pg.draw.rect(screen, "grey0", (c.SCREEN_WIDTH, 0, c.SIDE_PANEL, 400), 2)
-    draw_text(str(world.health), text_font, "grey100", 0,0)
-    draw_text(str(world.money), text_font, "grey100", 0,30)
-    draw_text(str(world.level), text_font, "grey100", 0,60)
+    screen.blit(logo_image,(c.SCREEN_WIDTH, 400))
+    draw_text("NIVEL: " + str(world.level), text_font, "grey100", c.SCREEN_WIDTH + 10, 10)
+    screen.blit(heart_image, (c.SCREEN_WIDTH + 10, 35))
+    draw_text(str(world.health), text_font, "grey100", c.SCREEN_WIDTH + 50, 40)
+    screen.blit(coin_image, (c.SCREEN_WIDTH + 10, 65))
+    draw_text(str(world.money), text_font, "grey100", c.SCREEN_WIDTH + 50, 70)
+    
 
 def create_turret(mouse_pos):
     mouse_title_x = mouse_pos[0] // c.TILE_SIZE
@@ -94,7 +101,7 @@ def create_turret(mouse_pos):
                 
         #Si la torre no es una torre no valida, no crearla
         if space_is_free == True:
-            new_turret = Turret(turret_spritesheets, mouse_title_x, mouse_title_y)
+            new_turret = Turret(turret_spritesheets, mouse_title_x, mouse_title_y, shot_fx)
             turret_group.add(new_turret)
             world.money -= c.BUY_COST
 
@@ -187,6 +194,8 @@ while run:
             world.process_enemies()
 
         #Dibujar los botones
+        draw_text(str(c.BUY_COST), text_font, "grey100", c.SCREEN_WIDTH + 215, 135)
+        screen.blit(coin_image, (c.SCREEN_WIDTH + 260, 130))
         if turret_buy_button.draw(screen):
             placing_turrets = True
         
@@ -204,6 +213,8 @@ while run:
             #Si la torre es seleccionada actualizar la torre
         if selected_turret:
             if selected_turret.upgrade_level < c.TURRET_LEVELS:
+                draw_text(str(c.UPGRADE_COST), text_font, "grey100", c.SCREEN_WIDTH + 215, 195)
+                screen.blit(coin_image, (c.SCREEN_WIDTH + 260, 190))
                 if upgrade_button.draw(screen):
                     if world.money >= c.UPGRADE_COST:
                         selected_turret.upgrade()
