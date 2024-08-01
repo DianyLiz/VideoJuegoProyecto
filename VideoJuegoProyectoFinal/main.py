@@ -150,117 +150,97 @@ while run:
 
     clock.tick(c.FPS)
 
-    if game_over == False:
-        #Revisar si perdio
+    if not game_over:
+        # Verificar si el jugador perdió
         if world.health <= 0:
             game_over = True
-            game_outcome = -1 #Perdio
+            game_outcome = -1  # Perdiste
+        # Verificar si el jugador ganó
         if world.level > c.TOTAL_LEVELS:
             game_over = True
-            game_outcome = 1 # Gano
+            game_outcome = 1  # Ganaste
 
-
-        #Actualiza los grupos
+        # Actualizar grupos
         enemy_group.update(world)
         turret_group.update(enemy_group, world)
 
-        #seleccionada en el cursor del ratón 
-        if selected_turret:
-            selected_turret.selected = True
+        # Dibujar mundo
+        world.draw(screen)
+        enemy_group.draw(screen)
+        for turret in turret_group:
+            turret.draw(screen)
 
+        display_data()
 
-    #dibujar el mundo
-    world.draw(screen)
-
-    
-    #Dibujar el grupo 
-    enemy_group.draw(screen)
-    for turret in turret_group:
-        turret.draw(screen)
-
-    display_data()
-
-    if game_over == False:
-        #Revisa si se comenzo o no el juego
-        if level_started == False:
-            if begin_button.draw(screen):
-                level_started = True
-        else:
-            # Opcion de Aceleracion de juego
-            if fast_forward_button.draw(screen):
-                game_speed_toggle = not game_speed_toggle
-
-            if game_speed_toggle:
-                world.game_speed = 1
-                fast_forward_button.image = fast_forward_false_image
+        if not game_over:
+            if not level_started:
+                if begin_button.draw(screen):
+                    level_started = True
             else:
-                world.game_speed = 2
-                fast_forward_button.image = fast_forward_true_image
+                # Alternar velocidad del juego
+                if fast_forward_button.draw(screen):
+                    game_speed_toggle = not game_speed_toggle
 
-            if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN:
-                if world.spawned_enemies < len(world.enemy_list):
-                    enemy_type = world.enemy_list[world.spawned_enemies]
-                    enemy = Enemy(enemy_type, world.waypoints, enemy_images)
-                    enemy_group.add(enemy)
-                    world.spawned_enemies += 1
-                    last_enemy_spawn = pg.time.get_ticks()
-
-
-        #Revisar si el nivel ha sido completado
-        if world.check_level_complete() == True:
-            world.money += c.LEVEL_COMPLETE_REWARD
-            world.level += 1
-            level_started = False
-            last_enemy_spawn = pg.time.get_ticks()
-            world.reset_level()
-            world.process_enemies()
-            world.game_speed = 1
-
-        #Dibujar los botones
-        draw_text(str(c.BUY_COST), text_font, "grey100", c.SCREEN_WIDTH + 215, 135)
-        screen.blit(coin_image, (c.SCREEN_WIDTH + 260, 130))
-        if turret_buy_button.draw(screen):
-            placing_turrets = True
-
-        # Actualizar la imagen del botón de compra de torretas si hay o no suficiente dinero
-        if world.money >= c.BUY_COST:
-            turret_buy_button.image = buy_turret_image
-        else:
-            turret_buy_button.image = buy_turret_false_image
-
-        if turret_buy_button.draw(screen):
-            placing_turrets = True
-        
-        
-        #Si la colocacion de la torre es correcta, crear la torre
-        if placing_turrets == True:
-            #Cursor en la torre
-            cursor_rect = cursor_turret.get_rect()
-            cursor_pos = pg.mouse.get_pos()
-            if cursor_pos[0] <= c.SCREEN_WIDTH:
-                cursor_rect.center = cursor_pos
-            screen.blit(cursor_turret, cursor_rect)
-            if cancel_buy_button.draw(screen):
-                placing_turrets = False
-
-            #Si la torre es seleccionada actualizar la torre
-        if selected_turret:
-            if selected_turret.upgrade_level < c.TURRET_LEVELS:
-                draw_text(str(c.UPGRADE_COST), text_font, "grey100", c.SCREEN_WIDTH + 215, 195)
-                screen.blit(coin_image, (c.SCREEN_WIDTH + 260, 190))
-                if world.money >= c.UPGRADE_COST:
-                    upgrade_button.image = upgrade_turret_image
+                if game_speed_toggle:
+                    world.game_speed = 1
+                    fast_forward_button.image = fast_forward_false_image
                 else:
-                    upgrade_button.image = upgrade_turret_false_image
-                if upgrade_button.draw(screen):
-                    # Verificar Si hay suficiente dinero para mejorar la torreta
+                    world.game_speed = 2
+                    fast_forward_button.image = fast_forward_true_image
+
+                if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN:
+                    if world.spawned_enemies < len(world.enemy_list):
+                        enemy_type = world.enemy_list[world.spawned_enemies]
+                        enemy = Enemy(enemy_type, world.waypoints, enemy_images)
+                        enemy_group.add(enemy)
+                        world.spawned_enemies += 1
+                        last_enemy_spawn = pg.time.get_ticks()
+
+            # Verificar finalización de nivel
+            if world.check_level_complete():
+                world.money += c.LEVEL_COMPLETE_REWARD
+                world.level += 1
+                level_started = False
+                last_enemy_spawn = pg.time.get_ticks()
+                world.reset_level()
+                world.process_enemies()
+                world.game_speed = 1
+
+            # Dibujar botones
+            draw_text(str(c.BUY_COST), text_font, "grey100", c.SCREEN_WIDTH + 215, 135)
+            screen.blit(coin_image, (c.SCREEN_WIDTH + 260, 130))
+            if turret_buy_button.draw(screen):
+                placing_turrets = True
+
+            # Actualizar imagen del botón de compra según el dinero
+            if world.money >= c.BUY_COST:
+                turret_buy_button.image = buy_turret_image
+            else:
+                turret_buy_button.image = buy_turret_false_image
+
+            if placing_turrets:
+                cursor_rect = cursor_turret.get_rect()
+                cursor_pos = pg.mouse.get_pos()
+                if cursor_pos[0] <= c.SCREEN_WIDTH:
+                    cursor_rect.center = cursor_pos
+                screen.blit(cursor_turret, cursor_rect)
+                if cancel_buy_button.draw(screen):
+                    placing_turrets = False
+
+            if selected_turret:
+                if selected_turret.upgrade_level < c.TURRET_LEVELS:
+                    draw_text(str(c.UPGRADE_COST), text_font, "grey100", c.SCREEN_WIDTH + 215, 195)
+                    screen.blit(coin_image, (c.SCREEN_WIDTH + 260, 190))
                     if world.money >= c.UPGRADE_COST:
+                        upgrade_button.image = upgrade_turret_image
+                    else:
+                        upgrade_button.image = upgrade_turret_false_image
+                    if upgrade_button.draw(screen) and world.money >= c.UPGRADE_COST:
                         selected_turret.upgrade()
-                        world.money -= c.UPGRADE_COST  
-                    
+                        world.money -= c.UPGRADE_COST
 
     else:
-        pg.draw.rect(screen, "dodgerblue", (200, 200, 400, 200), border_radius = 30)
+        pg.draw.rect(screen, "dodgerblue", (200, 200, 400, 200), border_radius=30)
         if game_outcome == -1:
             draw_text("Perdiste", large_font, "grey0", 310, 230)
         elif game_outcome == 1:
@@ -276,27 +256,20 @@ while run:
             world.process_enemies()
             enemy_group.empty()
             turret_group.empty()
-                        
 
-    #Manejo del evento
+    # Manejo de eventos
     for event in pg.event.get():
         if event.type == pg.QUIT:
             run = False
-
-        #Manejo de eventos del ratón
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pg.mouse.get_pos()
-      #Chequiar si el mouse se encuentra en el area del juego
             if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
-             #Limpiar la torre seleccionada
                 selected_turret = None
                 clear_selection()
-                if placing_turrets == True:
-                    if world.money >= c.BUY_COST:
-                        create_turret(mouse_pos)
+                if placing_turrets and world.money >= c.BUY_COST:
+                    create_turret(mouse_pos)
                 else:
                     selected_turret = select_turret(mouse_pos)
-
 
     pg.display.flip()
 
