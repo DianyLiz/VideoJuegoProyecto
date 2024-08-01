@@ -19,18 +19,23 @@ screen = pg.display.set_mode((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
 pg.display.set_caption("Tower Defence")
 
 #Variables del Juego
+in_menu = True
 game_over = False
 geme_outcome = 0 
 game_speed_toggle = False
+game_paused = False
 afford = False
 level_started = False
 last_enemy_spawn = pg.time.get_ticks()
 placing_turrets = False
 selected_turret = None
+confirm_exit = False
+confirm_restart = False
 
 #Imagen del mapa
 map_image = pg.image.load("levels/level.png").convert_alpha()
-
+#Menu Principal
+main_menu_image = pg.image.load("imagen/main_menu.png").convert_alpha()
 #torre individual imagen
 turret_spritesheets = []
 for x in range(1, c.TURRET_LEVELS + 1):
@@ -48,6 +53,7 @@ enemy_images = {
 }
 
 #Boton 
+play_image = pg.image.load('imagen/play.png').convert_alpha()
 buy_turret_image = pg.image.load("imagen/buy_turret.png").convert_alpha()
 buy_turret_false_image = pg.image.load('imagen/buy_turret_false.png').convert_alpha()
 cancel_image = pg.image.load('imagen/cancel.png').convert_alpha()
@@ -57,6 +63,12 @@ begin_image = pg.image.load("imagen/begin.png").convert_alpha()
 restart_image = pg.image.load("imagen/restart.png").convert_alpha()
 fast_forward_false_image = pg.image.load('imagen/fast_forward_false.png').convert_alpha()
 fast_forward_true_image = pg.image.load('imagen/fast_forward_true.png').convert_alpha()
+exit_image = pg.image.load('imagen/exit.png').convert_alpha()
+yes_image = pg.image.load('imagen/yes.png').convert_alpha()
+not_image = pg.image.load('imagen/no.png').convert_alpha()
+pause_image = pg.image.load('imagen/pause.png').convert_alpha()
+continue_image = pg.image.load('imagen/continue.png').convert_alpha()
+restart_level_image = pg.image.load('imagen/restart_level.png').convert_alpha()
 
 #Interfaz grafica
 heart_image = pg.image.load("imagen/heart.png").convert_alpha()
@@ -144,77 +156,86 @@ upgrade_button = Button(c.SCREEN_WIDTH + 5, 180, upgrade_turret_image, True)
 begin_button = Button(c.SCREEN_WIDTH + 60, 300, begin_image, True)
 restart_button = Button(310, 300, restart_image, True)
 fast_forward_button = Button(c.SCREEN_WIDTH + 60, 300, fast_forward_false_image, False)
+play_button = Button((1020 // 2) - 75, 400, play_image, True)
+exit_button = Button(965, 5, exit_image, True)
+pause_button = Button(915, 5, pause_image, True)
+restart_level_button = Button(965, 55, restart_level_image, True)
 
 run = True
 while run:
 
     clock.tick(c.FPS)
+    if not game_paused:
+        if in_menu:
+            screen.blit(main_menu_image, (0, 0))
+            if play_button.draw(screen):
+                in_menu = False
 
-    if not game_over:
+        elif not game_over:
         # Verificar si el jugador perdió
-        if world.health <= 0:
-            game_over = True
-            game_outcome = -1  # Perdiste
-        # Verificar si el jugador ganó
-        if world.level > c.TOTAL_LEVELS:
-            game_over = True
-            game_outcome = 1  # Ganaste
+            if world.health <= 0:
+                game_over = True
+                game_outcome = -1  # Perdiste
+            # Verificar si el jugador ganó
+            if world.level > c.TOTAL_LEVELS:
+                game_over = True
+                game_outcome = 1  # Ganaste
 
-        # Actualizar grupos
-        enemy_group.update(world)
-        turret_group.update(enemy_group, world)
+            # Actualizar grupos
+            enemy_group.update(world)
+            turret_group.update(enemy_group, world)
 
-        # Dibujar mundo
-        world.draw(screen)
-        enemy_group.draw(screen)
-        for turret in turret_group:
-            turret.draw(screen)
+            # Dibujar mundo
+            world.draw(screen)
+            enemy_group.draw(screen)
+            for turret in turret_group:
+                turret.draw(screen)
 
-        display_data()
+            display_data()
 
-        if not game_over:
-            if not level_started:
-                if begin_button.draw(screen):
-                    level_started = True
-            else:
-                # Alternar velocidad del juego
-                if fast_forward_button.draw(screen):
-                    game_speed_toggle = not game_speed_toggle
-
-                if game_speed_toggle:
-                    world.game_speed = 1
-                    fast_forward_button.image = fast_forward_false_image
+            if not game_over:
+                if not level_started:
+                    if begin_button.draw(screen):
+                        level_started = True
                 else:
-                    world.game_speed = 2
-                    fast_forward_button.image = fast_forward_true_image
+                    # Alternar velocidad del juego
+                    if fast_forward_button.draw(screen):
+                        game_speed_toggle = not game_speed_toggle
 
-                if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN:
-                    if world.spawned_enemies < len(world.enemy_list):
-                        enemy_type = world.enemy_list[world.spawned_enemies]
-                        enemy = Enemy(enemy_type, world.waypoints, enemy_images)
-                        enemy_group.add(enemy)
-                        world.spawned_enemies += 1
-                        last_enemy_spawn = pg.time.get_ticks()
+                    if game_speed_toggle:
+                        world.game_speed = 1
+                        fast_forward_button.image = fast_forward_false_image
+                    else:
+                        world.game_speed = 2
+                        fast_forward_button.image = fast_forward_true_image
 
-            # Verificar finalización de nivel
-            if world.check_level_complete():
-                world.money += c.LEVEL_COMPLETE_REWARD
-                world.level += 1
-                level_started = False
-                last_enemy_spawn = pg.time.get_ticks()
-                world.reset_level()
-                world.process_enemies()
-                world.game_speed = 1
+                    if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN:
+                        if world.spawned_enemies < len(world.enemy_list):
+                            enemy_type = world.enemy_list[world.spawned_enemies]
+                            enemy = Enemy(enemy_type, world.waypoints, enemy_images)
+                            enemy_group.add(enemy)
+                            world.spawned_enemies += 1
+                            last_enemy_spawn = pg.time.get_ticks()
 
-            # Dibujar botones
-            draw_text(str(c.BUY_COST), text_font, "grey100", c.SCREEN_WIDTH + 215, 135)
-            screen.blit(coin_image, (c.SCREEN_WIDTH + 260, 130))
-            if turret_buy_button.draw(screen):
-                placing_turrets = True
+                # Verificar finalización de nivel
+                if world.check_level_complete():
+                    world.money += c.LEVEL_COMPLETE_REWARD
+                    world.level += 1
+                    level_started = False
+                    last_enemy_spawn = pg.time.get_ticks()
+                    world.reset_level()
+                    world.process_enemies()
+                    world.game_speed = 1
 
-            # Actualizar imagen del botón de compra según el dinero
-            if world.money >= c.BUY_COST:
-                turret_buy_button.image = buy_turret_image
+                # Dibujar botones
+                draw_text(str(c.BUY_COST), text_font, "grey100", c.SCREEN_WIDTH + 215, 135)
+                screen.blit(coin_image, (c.SCREEN_WIDTH + 260, 130))
+                if turret_buy_button.draw(screen):
+                    placing_turrets = True
+
+                # Actualizar imagen del botón de compra según el dinero
+                if world.money >= c.BUY_COST:
+                    turret_buy_button.image = buy_turret_image
             else:
                 turret_buy_button.image = buy_turret_false_image
 
@@ -227,47 +248,132 @@ while run:
                 if cancel_buy_button.draw(screen):
                     placing_turrets = False
 
-            if selected_turret:
-                if selected_turret.upgrade_level < c.TURRET_LEVELS:
-                    draw_text(str(c.UPGRADE_COST), text_font, "grey100", c.SCREEN_WIDTH + 215, 195)
-                    screen.blit(coin_image, (c.SCREEN_WIDTH + 260, 190))
-                    if world.money >= c.UPGRADE_COST:
-                        upgrade_button.image = upgrade_turret_image
-                    else:
-                        upgrade_button.image = upgrade_turret_false_image
-                    if upgrade_button.draw(screen) and world.money >= c.UPGRADE_COST:
-                        selected_turret.upgrade()
-                        world.money -= c.UPGRADE_COST
+            # Si la torreta es seleccionada, entonces mostrar el boton de mejora
+                if selected_turret:
+                    # Si la torreta puede ser mejorada, entonces mostrar el boton de mejora
+                    if selected_turret.upgrade_level < c.TURRET_LEVELS:
+                        # Mostrar el costo de la mejora
+                        draw_text(str(c.UPGRADE_COST), text_font, "grey100", c.SCREEN_WIDTH + 215, 195)
+                        screen.blit(coin_image, (c.SCREEN_WIDTH + 260, 190))
+                        # Actualizar la imagen del botón de mejora de torretas si hay o no suficiente dinero
+                        if world.money >= c.UPGRADE_COST:
+                            upgrade_button.image = upgrade_turret_image
+                        else:
+                            upgrade_button.image = upgrade_turret_false_image
+                        if upgrade_button.draw(screen):
+                            # Verificar Si hay suficiente dinero para mejorar la torreta
+                            if world.money >= c.UPGRADE_COST:
+                                selected_turret.upgrade()
+                                world.money -= c.UPGRADE_COST
+            # Revisar si el boton de salir es presionado
+            if exit_button.draw(screen):
+                game_paused = True
+                confirm_exit = True
+                
+            # Revisar si el boton de pausa es presionado
+            if pause_button.draw(screen):                    
+                game_paused = True
+                
+            # Revisar si el boton de reinicio es presionado
+            if restart_level_button.draw(screen):
+                game_paused = True
+                confirm_restart = True
 
+        else:
+            pg.draw.rect(screen, "dodgerblue", (200, 200, 400, 200), border_radius=30)
+            if game_outcome == -1:
+                draw_text("Perdiste", large_font, "grey0", 310, 230)
+            elif game_outcome == 1:
+                draw_text("Ganaste!", large_font, "grey0", 315, 230)
+            if restart_button.draw(screen):
+                game_over = False
+                level_started = False
+                placing_turrets = False
+                selected_turret = None
+                last_enemy_spawn = pg.time.get_ticks()
+                world = World(world_data, map_image)
+                world.process_data()
+                world.process_enemies()
+                enemy_group.empty()
+                turret_group.empty()
     else:
-        pg.draw.rect(screen, "dodgerblue", (200, 200, 400, 200), border_radius=30)
-        if game_outcome == -1:
-            draw_text("Perdiste", large_font, "grey0", 310, 230)
-        elif game_outcome == 1:
-            draw_text("Ganaste!", large_font, "grey0", 315, 230)
-        if restart_button.draw(screen):
-            game_over = False
-            level_started = False
-            placing_turrets = False
-            selected_turret = None
-            last_enemy_spawn = pg.time.get_ticks()
-            world = World(world_data, map_image)
-            world.process_data()
-            world.process_enemies()
-            enemy_group.empty()
-            turret_group.empty()
+        # Confirmar la salida del juego
+        if confirm_exit:
+            pg.draw.rect(screen, "grey", (200, 200, 400, 200), border_radius = 30)
+            draw_text("¿QUIERES SALIR?", large_font, "grey0", 250, 240)
+            yes_button = Button(275, 320, yes_image, True)
+            no_button = Button(425, 320, not_image, True)
+
+            if yes_button.draw(screen):
+                in_menu = True
+                game_over = False
+                confirm_exit = False
+                game_paused = False
+                # Restablecer el juego a su posición inicial
+                level_started = False
+                placing_turrets = False
+                selected_turret = None
+                last_enemy_spawn = pg.time.get_ticks()
+                world = World(world_data, map_image)
+                world.process_data()
+                world.process_enemies()
+                enemy_group.empty()
+                turret_group.empty()
+
+            if no_button.draw(screen):
+                confirm_exit = False
+                game_paused = False
+
+        # Confirmar el reinicio del nivel
+        elif confirm_restart:
+            pg.draw.rect(screen, "grey", (200, 200, 400, 200), border_radius = 30)
+            draw_text("¿REINICIAR NIVEL?", large_font, "grey0", 250, 240)
+            yes_button = Button(275, 320, yes_image, True)
+            no_button = Button(425, 320, not_image, True)
+
+            if yes_button.draw(screen):
+                game_over = False
+                confirm_restart = False
+                game_paused = False
+                # Restablecer el juego a su posición inicial
+                level_started = False
+                placing_turrets = False
+                selected_turret = None
+                last_enemy_spawn = pg.time.get_ticks()
+                world = World(world_data, map_image)
+                world.process_data()
+                world.process_enemies()
+                enemy_group.empty()
+                turret_group.empty()
+
+            if no_button.draw(screen):
+                confirm_restart = False
+                game_paused = False
+        # Pausar el juego
+        elif game_paused:
+            pg.draw.rect(screen, "grey", (200, 200, 400, 200), border_radius = 30)
+            draw_text("JUEGO PAUSADO", large_font, "grey0", 250, 240)
+            continue_button = Button(275, 320, continue_image, True)
+            if continue_button.draw(screen):
+                game_paused = False
 
     # Manejo de eventos
     for event in pg.event.get():
         if event.type == pg.QUIT:
             run = False
+        
+        #Manejo de eventos del ratón
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pg.mouse.get_pos()
+            #Chequiar si el ratón se encuentra sobre una torreta
             if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
+                # Limpiar la seleccion de la torre
                 selected_turret = None
                 clear_selection()
-                if placing_turrets and world.money >= c.BUY_COST:
-                    create_turret(mouse_pos)
+                if placing_turrets == True:
+                    # Revisar si hay suficiente dinero para poner una torreta
+                    if world.money >= c.BUY_COST:
+                        create_turret(mouse_pos)
                 else:
                     selected_turret = select_turret(mouse_pos)
 

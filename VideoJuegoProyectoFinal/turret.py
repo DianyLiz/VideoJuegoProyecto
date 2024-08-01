@@ -45,6 +45,7 @@ class Turret(pg.sprite.Sprite):
         self.range_image.set_alpha(100)
         self.range_rect = self.range_image.get_rect()
         self.range_rect.center = self.rect.center
+        
     def load_images(self, sprite_sheet):
         #Extraer las imagenes de la hoja de animacion
         size = sprite_sheet.get_height()
