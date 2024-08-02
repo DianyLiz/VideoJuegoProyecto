@@ -54,6 +54,7 @@ enemy_images = {
 
 #Boton 
 play_image = pg.image.load('imagen/play.png').convert_alpha()
+close_image = pg.image.load('imagen/quit_game.png').convert_alpha()
 buy_turret_image = pg.image.load("imagen/buy_turret.png").convert_alpha()
 buy_turret_false_image = pg.image.load('imagen/buy_turret_false.png').convert_alpha()
 cancel_image = pg.image.load('imagen/cancel.png').convert_alpha()
@@ -157,6 +158,7 @@ begin_button = Button(c.SCREEN_WIDTH + 60, 300, begin_image, True)
 restart_button = Button(310, 300, restart_image, True)
 fast_forward_button = Button(c.SCREEN_WIDTH + 60, 300, fast_forward_false_image, False)
 play_button = Button((1020 // 2) - 75, 400, play_image, True)
+close_button = Button((1020 // 2) - 75, 400, play_image, True)
 exit_button = Button(965, 5, exit_image, True)
 pause_button = Button(915, 5, pause_image, True)
 restart_level_button = Button(965, 55, restart_level_image, True)
@@ -165,6 +167,7 @@ run = True
 while run:
 
     clock.tick(c.FPS)
+
     if not game_paused:
         if in_menu:
             screen.blit(main_menu_image, (0, 0))
@@ -357,25 +360,31 @@ while run:
             if continue_button.draw(screen):
                 game_paused = False
 
+        # Boton de salida
+        
+
+
     # Manejo de eventos
     for event in pg.event.get():
         if event.type == pg.QUIT:
             run = False
         
-        #Manejo de eventos del ratón
+        # Manejo de eventos del ratón
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pg.mouse.get_pos()
-            #Chequiar si el ratón se encuentra sobre una torreta
+            # Chequear si el ratón se encuentra sobre una torre
             if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
-                # Limpiar la seleccion de la torre
+                # Limpiar la selección de la torre
                 selected_turret = None
                 clear_selection()
-                if placing_turrets == True:
+                if placing_turrets:
                     # Revisar si hay suficiente dinero para poner una torreta
                     if world.money >= c.BUY_COST:
                         create_turret(mouse_pos)
                 else:
                     selected_turret = select_turret(mouse_pos)
+
+    
 
     pg.display.flip()
 
