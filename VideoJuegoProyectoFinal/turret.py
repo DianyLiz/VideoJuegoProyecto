@@ -12,6 +12,7 @@ class Turret(pg.sprite.Sprite):
         self.last_shot = pg.time.get_ticks()
         self.selected = False
         self.target = None
+        self.kill_count = 0
 
         # Posicion de la variable
         self.tile_x = tile_x
@@ -57,11 +58,11 @@ class Turret(pg.sprite.Sprite):
         return animation_list
     
     def update(self, enemy_group, world):
-        # Si el objetivo fue localizado, aplicar animacion de disparo
+        # Si el objetivo es localizado, aplicar animacion de disparo
         if self.target:
             self.play_animation()
         else:
-            # Busqueda desde nueva posicion a la actual
+            # Busqueda  nueva posicion a la actual
             if pg.time.get_ticks() - self.last_shot > (self.cooldown / world.game_speed):
                 self.pick_target(enemy_group)
     
@@ -80,6 +81,8 @@ class Turret(pg.sprite.Sprite):
                     self.angle = math.degrees(math.atan2(-y_dist, x_dist))
                     # Dañar al enemigo
                     self.target.health -= c.DAMAGE
+                    if self.target.health <= 0:
+                        self.kill_count += 1
                     # Cargar el sonido
                     self.shot_fx.play()
                     break
