@@ -17,11 +17,28 @@ class Enemy(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
+        self.flash_duration = 0.1
+        self.is_flashing = False
+        self.flash_timer = 0
 
     def update(self, world):
         self.move(world)
         self.rotate()
         self.check_alive(world)
+        self.handle_flashing(world)
+
+    def handle_flashing(self, world):
+        if self.is_flashing:
+            # Aplicar un tinte rojo temporalmente
+            red_tint = pg.Surface(self.image.get_size(), pg.SRCALPHA)
+            red_tint.fill((255, 0, 0, 128))  # Rojo con 50% de transparencia
+            self.image.blit(red_tint, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+            # Actualizar el temporizador de parpadeo
+            self.flash_timer -= world.delta_time * 1000  # Ajustar con delta time
+            if self.flash_timer <= 0:
+                self.is_flashing = False
+                # Restaurar el color original del sprite
+                self.image = pg.transform.rotate(self.original_image, self.angle)
 
     def move(self, world):
         # Calcular la dirección hacia el siguiente waypoint
