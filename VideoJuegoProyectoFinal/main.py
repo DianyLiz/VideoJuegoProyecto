@@ -39,7 +39,7 @@ inicio_nivel = False
 
 
 # Mapa
-map_image = pg.image.load('levels/level.png').convert_alpha()
+map_image = pg.image.load('levels/Background (1).png').convert_alpha()
 # Menu principal
 main_menu_image = pg.image.load('gui/main_menu.png').convert_alpha()
 # Fondo e informacion de juego
